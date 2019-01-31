@@ -16,6 +16,7 @@ pipeline {
       steps {
         script {
           currentBuild.displayName = "Build_App .${BUILD_NUMBER}";
+          sh "chmod +x app/gradlew"
         }
       }
     }
@@ -24,22 +25,7 @@ pipeline {
       steps {
         dir("./app") {
           script {
-            sh "./gradlew test"
-          }
-        }
-      }
-    }
-
-    stage("Code Quality") {
-      steps {
-        dir("./app") {
-          withSonarQubeEnv('Sonarqube') {
-            withCredentials([usernamePassword(credentialsId: 'lidop', passwordVariable: 'rootPassword', usernameVariable: 'rootUser')]) {
-              sh 'docker run --dns ${IPADDRESS} --rm  -v ${PWD}/:/work -e SERVER=http://sonarqube.service.lidop.local:8084/sonarqube -e PROJECT_KEY=lab-backend  registry.service.lidop.local:5000/lidop/sonarscanner:latest'
-            }
-          }
-          timeout(time: 1, unit: 'HOURS') {
-            waitForQualityGate abortPipeline: true
+            sh 'docker run --rm -v ${PWD}:/work -w /work java:openjdk-8-jdk-alpine sh -c "./gradlew test"'
           }
         }
       }
@@ -49,7 +35,7 @@ pipeline {
       steps {
         dir("./app") {
           script {
-            sh "./gradlew build"
+            sh 'docker run --rm -v ${PWD}:/work -w /work java:openjdk-8-jdk-alpine sh -c "./gradlew build"'
           }
         }
       }
@@ -75,7 +61,7 @@ pipeline {
             echo "no running instance."
           }
           finally {
-            sh "docker run -d -p 9110:8080 --name lab-backend lab-backend"
+            sh "docker run -d -p 9110:6080 --name lab-backend lab-backend"
           }
         }
       }
