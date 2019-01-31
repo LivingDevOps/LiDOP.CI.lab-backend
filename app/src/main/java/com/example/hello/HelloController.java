@@ -15,7 +15,7 @@ public class HelloController {
     // Default values which is expected is "Dude"
     // Is this really the "frontend" or "backend"?
     @RequestMapping(value = "/hello") 
-    String helloName(@RequestParam(value = "name", defaultValue = "Charly") String name){
-      return "Hello " + name + " from your frontend!" ;
+    String helloName(@RequestParam(value = "name", defaultValue = "Dude") String name){
+      return "Hello " + name + " from your backend!" ;
     }    
 }
